@@ -20,7 +20,7 @@ public class GUI extends JFrame{
 
 		add(p, BorderLayout.NORTH);
 		setSize(200,200);
-		// setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setVisible(true);
 	} 
 	public static void main(String args[]) {
