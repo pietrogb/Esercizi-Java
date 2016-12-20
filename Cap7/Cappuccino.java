@@ -8,7 +8,7 @@ import java.util.*;
 
 public class Cappuccino{
 	private static String macina(String s) {
-		System.out.println("inizia a macinare");
+		System.out.println("inizio a macinare");
 		try{
 			Thread.sleep((int)(Math.random()*100));
 		} catch(InterruptedException e) {System.err.println("Interrupted");}
@@ -22,17 +22,20 @@ public class Cappuccino{
 		System.out.println("scaldo l'acqua");
 		try{
 			Thread.sleep((int)(Math.random()*160));
-		} catch(InterruptedException e) {System.err.println("Interrupted");}
+		} catch(Exception e) {System.err.println("Interrupted");}
 		System.out.println("acqua bollente");
 		return 100;
 	}
 
 	private static String faiCaffe(String g, Integer a) {
-		System.out.println("inizio a fare il caffe");
+		System.out.println("inizio a fare il caffe'");
 		try {
 			Thread.sleep((int)(Math.random()*100));
-		} catch(InterruptedException e) {System.err.println("Interrupted");}
-		System.out.println("faccio il caffe' con " + g + " e acqua a " + a + "gradi");
+		} catch(Exception ex) {
+			Thread.currentThread().interrupt(); // Here!
+  			throw new RuntimeException(ex);
+		}
+		System.out.println("faccio il caffe' con " + g + " e acqua a " + a + " gradi");
 		return "caffe";
 	}
 
@@ -40,7 +43,7 @@ public class Cappuccino{
 		System.out.println("Inizio a fare schiuma");
 		try{
 			Thread.sleep((int)(Math.random()*160));
-		} catch(InterruptedException e) {System.err.println("Interrupted");}
+		} catch(Exception e) {System.err.println("Interrupted");}
 		System.out.println("fatta schiuma di " + l);
 		return "schiuma";
 	}
@@ -48,8 +51,8 @@ public class Cappuccino{
 	private static String mescola(String c, String l) {
 		try{
 			Thread.sleep((int)(Math.random()*100));
-		} catch(InterruptedException e) {System.err.println("Interrupted");}
-		System.out.println("aggiunto " + l + "sopra " +c);
+		} catch(Exception e) {System.err.println("Interrupted");}
+		System.out.println("aggiunto " + l + " sopra " +c);
 		return "cappuccino";
 	}
 
@@ -66,10 +69,13 @@ public class Cappuccino{
 	}
 
 	private static Callable<String> faiCaffeC (final Future<String> g, final Future<Integer> a) {
-		return new Callable<String>() {
-			// errore sulle get che possono sollevare InterruptedException
-			public String call() {return faiCaffe(g.get(), a.get());}
-		};
+		try{
+			return new Callable<String>() {
+				// errore sulle get che possono sollevare InterruptedException
+				public String call() {return faiCaffe(g.get(), a.get());}
+			};
+		} catch(Exception e) {System.err.println("Interrupted");}
+		// finally {return new Callable<String>();}
 	}
 
 	private static Callable<String> faiSchiumaC(final String l) {
@@ -89,7 +95,7 @@ public class Cappuccino{
 
 	static void cappuccinoPar() {
 		ExecutorService pool = Executors.newCachedThreadPool();
-
+		try{
 		Future<String> s = pool.submit(macinaC("caffe"));
 		Future<Integer> i = pool.submit(bollireC());
 		Future<String> c = pool.submit(faiCaffeC(s, i));
@@ -97,6 +103,12 @@ public class Cappuccino{
 		// errore sulle get che possono sollevare InterruptedException
 		String p = mescola(c.get(), l.get());
 		System.out.println("pronto il " +p);
+		} catch(Exception e) {}
+	}
+	public static void main(String[] args) {
+		Cappuccino c = new Cappuccino();
+		c.cappuccinoSeq();
+		c.cappuccinoPar();
 	}
 }
 
