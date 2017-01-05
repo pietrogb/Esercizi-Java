@@ -44,8 +44,8 @@ class Viaggio{
 			list.add(p);
 			if(list.length >= nMin) {
 				// sveglia le persone
-				for(Persona i: list) ;
-					// p.
+				for(Persona i: list)
+					p.notify();
 			}
 		}
 	}

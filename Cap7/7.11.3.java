@@ -11,14 +11,16 @@ Si chiede di modellare il traffico di un aereoporto completando il codice della 
 			~gli viene assegnata la pista per l'atterraggio
 			~viene invocato il suo metodo stampa
 	4. Definire il metodo void gestisci_partenza() in modo analogo a gestisci_arrivo()
-	5. Definire il metodo run() della classe TS in modo che attenda un aereo in ritardo o in partenza, lo facica atterrare correttamente, senza provocare scontri in pista
+	5. Definire il metodo run() della classe TS in modo che attenda un aereo in ritardo o in partenza, lo faccia atterrare correttamente, senza provocare scontri in pista
 	6. Sia possibile aggiungere campi dati o metodi nella classe Controllore
 	7. Si chiede di giustificare perché:
 		~ non si verifichino scontri di aerei (sia in ritardo che in orario)
 		~ è possibile che nello stesso momento un aereo stia tranistando in pista, un altro s'accodi in partenza ed un terzo s'accodi in arrivo
 */
 
-public class Aereo {
+import java.util.Vector;
+
+ class Aereo {
 	private static int n;
 	private int num;
 	private String direzione;
@@ -30,23 +32,28 @@ public class Aereo {
 	}
 }
 
-public class GeneraArrivi extends Thread {
+class GeneraArrivi extends Thread {
 	private Controllore contr;
 	GeneraArrivi(Controllore c) {contr = c;}
 	public void run() {
-		while(true) {
-			contr.add_arrivi(new Aereo("in arrivo")); sleep(200);
-		}
+		try{
+			while(true) {
+				contr.add_arrivi(new Aereo("in arrivo")); sleep(200);
+			}
+		} catch(InterruptedException e) {}
+
 	}
 }
 
-public class GeneraPartenze extends Thread {
+class GeneraPartenze extends Thread {
 	private Controllore contr;
 	GeneraPartenze(Controllore c) {contr = c;}
 	public void run() {
-		while(true) {
-			contr.add_arrivi(new Aereo("in partenza")); sleep(200);
-		}
+		try{
+			while(true) {
+				contr.add_arrivi(new Aereo("in partenza")); sleep(200);
+			}
+		} catch(InterruptedException e) {}
 	}
 }
 
@@ -54,18 +61,27 @@ public class Controllore extends Thread {
 	private Vector<Aereo> coda_arrivi = new Vector<Aereo>();
 	private Vector<Aereo> coda_partenze = new Vector<Aereo>();
 
-	// definire. aggiunge  alla coda di aerei in arrivo un aereo che necessita di usare la pista
-	public void add_arrivi(Aereo a) {
+	Object pista = new Object();
 
+	// definire: aggiunge  alla coda di aerei in arrivo un aereo che necessita di usare la pista
+	public void add_arrivi(Aereo a) {
+		synchronized(coda_arrivi) {
+			coda_arrivi.add(a);
+			coda_arrivi.notifyAll();
+		}
 	}
 
-	// definire. aaggiunge alla coda di aerei in partenza, un aereo che necessita di usare la pista
+	// definire: aggiunge alla coda di aerei in partenza, un aereo che necessita di usare la pista
 	public void add_partenze(Aereo a) {
-
+		synchronized(coda_partenze) {
+			coda_partenze.add(a);
+			coda_partenze.notifyAll();
+		}
 	}
 
 	private char prox_transito() {
 		// Non occorre definire questo metodo: consulta la tabella oraria e restituisce 'A' o 'P' indicando se assegnare la pista ad un aereo in arrivo o in partenza
+		return 'A';
 	}
 
 	public void run() {
@@ -78,20 +94,54 @@ public class Controllore extends Thread {
 
 	// definire
 	private void gestisci_arrivo() {
-
+		Aereo a = null;
+		synchronized(coda_arrivi){
+			if(coda_arrivi.isEmpty() == true){
+				new TS(coda_arrivi).start();
+				return;
+			}
+			else
+				a = coda_arrivi.remove(0);
+		}
+		synchronized(pista) { //ok anche con lock su this
+			a.stampa();
+		}
 	}
+
+	/*~viene prelevato dalla coda; gli viene assegnata la pista per l'atterraggio; viene invocato il suo metodo stampa*/
 
 	// definire
 	private void gestisci_partenza() {
-
+		Aereo a = null;
+		synchronized(coda_partenze){
+			if(coda_partenze.isEmpty() == true){
+				new TS(coda_partenze).start();
+				return;
+			}
+			else
+				a = coda_partenze.remove(0);
+		}
+		synchronized(pista) { //ok anche con lock su this
+			a.stampa();
+		}
 	}
 
 	private class TS extends Thread {
 		Vector<Aereo> coda;
-		T(Vector<Aereo> s) {coda = s;}
-		// definire
-		public void run() {
+		TS(Vector<Aereo> s) {coda = s;}
 
+		public void run() {
+			try {
+				Aereo a = null;
+				synchronized(coda) {
+					while(coda.isEmpty() == true) 
+						coda.wait();
+					a = coda.remove(0);
+				}
+				synchronized(pista) {//opp. Controllore.this
+					a.stampa();
+				}
+			} catch(InterruptedException e) {}
 		}
 	}
 
@@ -104,3 +154,11 @@ public class Controllore extends Thread {
 		contr.start();
 	}
 }
+
+/*
+ Si chiede di giustificare perché:
+	~ non si verifichino scontri di aerei (sia in ritardo che in orario)
+	~ è possibile che nello stesso momento un aereo stia tranistando in pista, un altro s'accodi in partenza ed un terzo s'accodi in arrivo
+
+Il motivo per cui nonsi verificano scontri è perché 
+*/

@@ -1,4 +1,4 @@
-// Il seguente codice ha una grande probabilità di sospendersi per un problema di deadlock. Usandosulla shell la combinazione di tasti Ctrl+\ s'ottendono informazioni sullo stato dei thread sospesi
+// Il seguente codice ha una grande probabilità di sospendersi per un problema di deadlock. Usando sulla shell la combinazione di tasti Ctrl+\ s'ottendono informazioni sullo stato dei thread sospesi
 class B {
 	public synchronized void m(C c) {
 		for(int k=0; k<1000000; k++) ;

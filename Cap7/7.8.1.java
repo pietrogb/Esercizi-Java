@@ -1,5 +1,5 @@
 /* Esempio vasi sull'uso di wait e notify.
-Scrivere un programma che crea ed avvia due thread concorrenti t1 e t2 hce soddisfano le seguenti specifiche:
+Scrivere un programma che crea ed avvia due thread concorrenti t1 e t2 che soddisfano le seguenti specifiche:
 	- il thread t2 stampa di tanto in tanto la stringa topolino
 	- il thread t1 incrementa un contatore i a partire dal valore 0 fino al valore 10000
 	- quando i vale 2000 il thread t1 "sospende" il thread t2, mentre quando i vale 6000 il thread t1 "riavvia" il thread t2. In particolare è richiesto che il thread t2 non effetui stampe mentre il contatore ha un valore nell'intervallo [2000, 6000].
