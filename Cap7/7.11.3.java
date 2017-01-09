@@ -41,7 +41,6 @@ class GeneraArrivi extends Thread {
 				contr.add_arrivi(new Aereo("in arrivo")); sleep(200);
 			}
 		} catch(InterruptedException e) {}
-
 	}
 }
 
