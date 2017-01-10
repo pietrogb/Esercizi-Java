@@ -1,12 +1,16 @@
 public class Torre{
 	private int persone_piano_terra;
 	private int persone_piano_uno;
+
 	private final int max_in_scala=10;
+
 	private Object lock_entrate=new Object();
+
 	private class Guardia_piano_uno extends Thread{
 		public void run() {
 			while (true) { 
 				try {
+					// System.out.println("Cerco di far scendere qualcuno");
 					synchronized(Torre.this) {
 						while (persone_piano_uno == 0) { //qualcuno vuole scendere
 							Torre.this.wait();
