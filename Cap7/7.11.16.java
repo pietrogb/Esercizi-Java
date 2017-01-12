@@ -7,14 +7,13 @@ class T1 extends Thread {
 	public T1(C c) {this.c = c;}
 
 	public void run() {
-		for (int k=0; k<10000; k++) {
+		for (int k=0; k<10000; k++);
 			synchronized(c) {
 				System.out.print("UNO");
 				(c.i)++;
 				c.notify();
 			}
 			System.out.print("DUE");
-		}
 	}
 }
 
@@ -51,5 +50,5 @@ Quale delle seguenti aggermazioni è vera per l'esecuzione del main() di Test?
 	2. può provocare la stampa UNO DUE TRE QUATTRO CINQUE SEI
 	3. può provocare la stampa TRE QUATTRO CINQUE SEI UNO DUE
 	4. può provocare la stampa UNO TRE CINQUE SEI DUE
-		Risposta: 4. 
+		Risposta: 1. 
 */

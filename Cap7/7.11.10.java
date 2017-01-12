@@ -3,14 +3,14 @@
 class D {
 	String x = "pippo";
 	D(String s) {x=s;}
-	public synchronized void set("String str") { x = str;}
+	public synchronized void set(String str) { x = str;}
 	public synchronized String get() {return x;}
 }
 
 class A{
 	private D s;
 	A(String st) { s = new D(st);}
-	A(D d){s=d}
+	A(D d){s=d;}
 
 	public synchronized void set(String str) { s.x = str;}
 	public synchronized String get() { return s.x;}
