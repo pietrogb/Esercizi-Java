@@ -105,7 +105,7 @@ public class RemoteClient{
 		/***PUNTO DI SINCRONIZZAZIONE 2***/
 
 		System.out.println("3:"+c.stampa();
-		ci.aggiungi(i);
+		c.aggiungi(i);
 		System.out.println("4:"+c.stampa());
 
 		/***PUNTO DI SINCRONIZZAZIONE 3***/
@@ -115,7 +115,7 @@ public class RemoteClient{
 		/***PUNTO DI SINCRONIZZAZIONE 4***/
 
 		System.out.println("6:"+c.stampa());
-		I i = ci.set(99);
+		i.set(99);
 		System.out.println("7:"+c.stampa());
 	}
 }

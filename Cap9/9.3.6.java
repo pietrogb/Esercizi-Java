@@ -12,9 +12,9 @@ class RImpl extends UnicastRemoteObject implements R{
 			synchronized(this){
 				while (condizione==false) {
 					wait();
-				} catch (Exception e) {}
+				}
 			}
-		}
+		} catch (Exception e) {}
 	}
 
 	public void n() throws RemoteException {
@@ -33,12 +33,12 @@ class RImpl extends UnicastRemoteObject implements R{
 public static void main(String[] args) {
 	R r= new RImpl();
 	Naming.rebind("pippo", r);
+	r.n();
 }
 // PROGRAMMA CHE ESEGUE NELL'HOST2
 public static void main(String[] args) {
 	R r= (R)Naming.lookup("pippo");
 	r.m();
-	r.n();
 }
 
 /*
