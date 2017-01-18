@@ -1,163 +1,125 @@
-/*7.11.3.java
-In un aereoporto una pista viene utilizzata sia dagli aerei in partenza che da quelli in arrivo.
-L'ordine è regolato da un controllore di volo.
-Gli aerei arrivano e partono secondo una tabella di orari giornalieri, ma si verificano frequentemente dei ritardi che devono esere opportunamente gestiti.
-Si chiede di modellare il traffico di un aereoporto completando il codice della classe Controllore riportato in modo tale che:
-	1. Siano definiti i metodi add_arrivi(Aereo a) e add_partenze(Aereo a) che aggiungono, ripettivamente alla coda di aerei in arrivo ed in partenza, un aereo che necessita di usare la pista
-	2. Deve essere possibile che nello stesso istante un aereo stia transitando in pista, un altro si accodi in partenza ed un terzo si accodi in arrivo
-	3. Definire il metodo void gestisci_arrivo() in modo che
-		- se è presente un aereo nella coda.arrivi, allora viene fatto atterrare, cioè
-			~viene prelevato dalla coda
-			~gli viene assegnata la pista per l'atterraggio
-			~viene invocato il suo metodo stampa
-	4. Definire il metodo void gestisci_partenza() in modo analogo a gestisci_arrivo()
-	5. Definire il metodo run() della classe TS in modo che attenda un aereo in ritardo o in partenza, lo faccia atterrare correttamente, senza provocare scontri in pista
-	6. Sia possibile aggiungere campi dati o metodi nella classe Controllore
-	7. Si chiede di giustificare perché:
-		~ non si verifichino scontri di aerei (sia in ritardo che in orario)
-		~ è possibile che nello stesso momento un aereo stia tranistando in pista, un altro s'accodi in partenza ed un terzo s'accodi in arrivo
+// 7.11.4
+/*
+Si consideri una tavola calda in cui vengono serviti i pasti nel seguente modo:
+	- i clienti si mettono in coda in ordine di arrivo
+	- ogni cliente prende un prim piatto, poi un secondo piatto ed infine paga alla cassa
+	- i clienti che hanno già prelevato i loro piatti possono pagare in un ordine qualsiasi
+	- nello stesso istante non possono essere servit due primi (o due secondi) a due clienti distinti, analogamente, nello stesso istante non possono effettuare il pagamento alla cassa due clienti distinti
+	- è possibile che nello stesso istante venga servito un primo ad un cliente, un seconod ad un altro cliente, ed un terzo cliente stia pagando.
+Si chiede di modellare il funzionamento di una tavola calda secondo il modello descritto sopra. Si chiede di completare il codice della classe TavolaCalda riportato in seguito in modo che rispetti le seguenti specifiche:
+	- definire il metodo prendi_primo(int i) in modo che, se i corriponde al numero del prossimo cliente a cui va servito il primo piatto, venga tracciato il servizio con una stampa, altrimenti, metta il cliente in attesa del proprio turno. Definire il metodo prendi_secondo(int i) in modo analogo
+	- definire il metodo paga(Cliente c) in moto tale che invochi il metodo pagamento della classe Cliente ed aggiorni il numero di clienti che hanno pagato.
+	- definire il metodo void generaClienti(final int i) che crea ed avvia un thread t che genera ed attiva n clienti che vogliono mangiare nella tavola calda. Si chiede di implementare il thread t tramite una classe interna anonima. Questo metodo deve terminare senza attendere che siano stati creati ed attivati tutti i clienti.
+	- definire il motodo void attendiClienti(final int n) che stampa la stringa finito di incassare solo didpo che n clienti hanno pagato alla cassa
+	- è possibile aggiiungere campi dati o metodi alla classe TavolaCalda
+Si chiede infine di giustificare brevemente perché:
+	1. Non è possibile che siano serviti contemporaneamente due primi
+	2. non è possibile che stiano pagando contemporaneamente due clienti
+	3. è possibile che nello stesso estnate sia servito un prino, in secondo e che qualcuno stia pagando alla cassa.
 */
 
-import java.util.Vector;
 
- class Aereo {
-	private static int n;
-	private int num;
-	private String direzione;
-	Aereo(String d) {num = n++; direzione=d;}
+class Cliente extends Thread{
+	private TavolaCalda mensa;
+	private static int nC;
+	private int numero;
 
-	// ATTENZIONE: invocare questo metodo quando l'aereo è già in pista.
-	public void stampa() {
-		System.out.println("aereo num " + num + " " + direzione);
+	// l'ordine di arrivo dei clienti corrisponde al numero assegnato dal costruttore
+	Cliente(TavolaCalda m) {mensa = m; numero = nC++;}
+
+	public void run(){
+		mensa.prendi_primo(numero);
+		mensa.prendi_secondo(numero);
+		mensa.paga(this);
+	}
+
+	// metodo invocato dal cassiere della tavola calda
+	public void pagamento() {
+		System.out.println(numero + " ha pagato");
 	}
 }
 
-class GeneraArrivi extends Thread {
-	private Controllore contr;
-	GeneraArrivi(Controllore c) {contr = c;}
-	public void run() {
+public class TavolaCalda {
+	private int prox_primo_da_servire = 0;
+	private int prox_secondo = 0;
+	private int hanno_pagato = 0;
+
+	private Object primo = new Object();
+	private Object secondo = new Object();
+	private Object cassa = new Object();
+
+
+	// definire i seguenti metodi:
+	void prendi_primo(int i) {
 		try{
-			while(true) {
-				contr.add_arrivi(new Aereo("in arrivo")); sleep(200);
+			synchronized(primo) {
+				while(i != prox_primo_da_servire){
+					primo.wait();
+				}
+				System.out.println("servito primo al numero "+ i);
+				prox_primo_da_servire++;
+				primo.notifyAll();
 			}
-		} catch(InterruptedException e) {}
+		}catch(InterruptedException e) {e.printStackTrace();}
 	}
-}
 
-class GeneraPartenze extends Thread {
-	private Controllore contr;
-	GeneraPartenze(Controllore c) {contr = c;}
-	public void run() {
+	void prendi_secondo(int i) {
 		try{
-			while(true) {
-				contr.add_arrivi(new Aereo("in partenza")); sleep(200);
-			}
-		} catch(InterruptedException e) {}
-	}
-}
-
-public class Controllore extends Thread {
-	private Vector<Aereo> coda_arrivi = new Vector<Aereo>();
-	private Vector<Aereo> coda_partenze = new Vector<Aereo>();
-
-	Object pista = new Object();
-
-	// definire: aggiunge  alla coda di aerei in arrivo un aereo che necessita di usare la pista
-	public void add_arrivi(Aereo a) {
-		synchronized(coda_arrivi) {
-			coda_arrivi.add(a);
-			coda_arrivi.notifyAll();
-		}
-	}
-
-	// definire: aggiunge alla coda di aerei in partenza, un aereo che necessita di usare la pista
-	public void add_partenze(Aereo a) {
-		synchronized(coda_partenze) {
-			coda_partenze.add(a);
-			coda_partenze.notifyAll();
-		}
-	}
-
-	private char prox_transito() {
-		// Non occorre definire questo metodo: consulta la tabella oraria e restituisce 'A' o 'P' indicando se assegnare la pista ad un aereo in arrivo o in partenza
-		return 'A';
-	}
-
-	public void run() {
-		while(true) {
-			char c = prox_transito();
-			if(c == 'A') gestisci_arrivo();
-			else gestisci_partenza();
-		}
-	}
-
-	// definire
-	private void gestisci_arrivo() {
-		Aereo a = null;
-		synchronized(coda_arrivi){
-			if(coda_arrivi.isEmpty() == true){
-				new TS(coda_arrivi).start();
-				return;
-			}
-			else
-				a = coda_arrivi.remove(0);
-		}
-		synchronized(pista) { //ok anche con lock su this
-			a.stampa();
-		}
-	}
-
-	/*~viene prelevato dalla coda; gli viene assegnata la pista per l'atterraggio; viene invocato il suo metodo stampa*/
-
-	// definire
-	private void gestisci_partenza() {
-		Aereo a = null;
-		synchronized(coda_partenze){
-			if(coda_partenze.isEmpty() == true){
-				new TS(coda_partenze).start();
-				return;
-			}
-			else
-				a = coda_partenze.remove(0);
-		}
-		synchronized(pista) { //ok anche con lock su this
-			a.stampa();
-		}
-	}
-
-	private class TS extends Thread {
-		Vector<Aereo> coda;
-		TS(Vector<Aereo> s) {coda = s;}
-
-		public void run() {
-			try {
-				Aereo a = null;
-				synchronized(coda) {
-					while(coda.isEmpty() == true) 
-						coda.wait();
-					a = coda.remove(0);
+			synchronized(secondo) {
+				while(i != prox_secondo){
+					secondo.wait();
 				}
-				synchronized(pista) {//opp. Controllore.this
-					a.stampa();
-				}
-			} catch(InterruptedException e) {}
+				System.out.println("servito secondo al numero "+ i);
+				prox_secondo++;
+				secondo.notifyAll();
+			}
+		}catch(InterruptedException e) {e.printStackTrace();}
+	}
+
+	void paga(Cliente c) {
+		synchronized(cassa) {
+			c.pagamento();
+			hanno_pagato++;
+			cassa.notifyAll();
 		}
+	}
+	
+	private void generaClienti(final int n) {
+		Thread t = new Thread()
+        {
+            public void run() {
+                for (int i = 0; i < n; ++i) {
+                    new Cliente(TavolaCalda.this).start();
+                }
+            }
+        };
+        t.start();
+	}
+
+	private void attendiClienti(final int n) {
+		try{
+			synchronized(cassa){
+				while(hanno_pagato != n) {
+					cassa.wait();
+				}
+				System.out.println("finito di incassare");
+			}
+		} catch(InterruptedException e) {e.printStackTrace();}
 	}
 
 	public static void main(String[] args) {
-		Controllore contr = new Controllore();
-		GeneraArrivi gA = new GeneraArrivi(contr);
-		GeneraPartenze gP = new GeneraPartenze(contr);
-		gA.start();
-		gP.start();
-		contr.start();
+		TavolaCalda m = new TavolaCalda();
+		m.generaClienti(100);
+		m.attendiClienti(100);
 	}
 }
 
 /*
- Si chiede di giustificare perché:
-	~ non si verifichino scontri di aerei (sia in ritardo che in orario)
-	~ è possibile che nello stesso momento un aereo stia tranistando in pista, un altro s'accodi in partenza ed un terzo s'accodi in arrivo
-
-Il motivo per cui nonsi verificano scontri è perché 
+Si chiede infine di giustificare brevemente perché:
+	1. Non è possibile che siano serviti contemporaneamente due primi
+		I primi vengono serviti prendendo possesso dell'oggetto Primo, che viene rilasciato quand'è stato servito. Poichè all'oggetto è associato un lock mutualmente esclusivo, non accadrà mai che siano serviti contemporanemente due primi.
+	2. non è possibile che stiano pagando contemporaneamente due clienti:
+		Per motivi analoghi, l'operazione di pagamento avviene in maniera sincronizzata sull'oggetto cassa, cui è associato un lock mutualmente esclusivo, impedendo quindi che possano effettuare il pagamento due clienti contemporaneamente.
+	3. è possibile che nello stesso istnate sia servito un primo, in secondo e che qualcuno stia pagando alla cassa.
+		Gli oggetti primo, secondo, cassa che governano il servizio del primo, secondo e pagamento alla cassa non dipoendono l'uno dall'altro, quindi è possibile che in contemporanea vengano eseguite le 3 operazioni di cui sopra.
 */

@@ -46,7 +46,7 @@ public class Torre{
 	}
 	public void entrate(int n) {
 		syncronized(lock_entrate){
-			persone_piano_uno += n;
+			persone_piano_terra += n;
 			lock_entrate.notifyAll(); //produce e poi sveglia la guardia d'entrata
 			//L'arrivo di un nuovo gruppo di visitatori non deve interferire con il gruppo che si stacca
 		}
