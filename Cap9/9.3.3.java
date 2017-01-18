@@ -58,10 +58,10 @@ public class CImpl extends UniCastRemoteObjec implements C{
 // programma server
 public class RemoteServer{
 	public static void main(String[] a) throws Exception{
-		CImpl ci=new CImpl();
+		CImpl ci=new CImpl(); //ci.top=0 v=0...0
 		Naming.rebind("pippo", ci);
-		ci.aggiungi(new IImpl(0));
-		ci.aggiungi(new IImpl(1));
+		ci.aggiungi(new IImpl(0)); //ci.top=1 v=[0, IImpl(0),...0]
+		ci.aggiungi(new IImpl(1)); //ci.top=2 v=[0, IImpl(0), IImpl(0)...0]
 
 		/***PUNTO DI SINCRONIZZAZIONE 1***/
 
@@ -119,3 +119,36 @@ public class RemoteClient{
 		System.out.println("7:"+c.stampa());
 	}
 }
+
+// Essendo i serializzabile, è una copia locale sul server ed i set fatti su di esso non provocano effetti sull'oggetto remoto. =(
+/*
+S'assuma che ognuno dei programmi precedentei, raggiunto un punto di sincronizzazione, non prosegua la propia esecuzione fino a quando anche l'altro programma non abbia raggiuno il corrispondente punto di sync.
+
+Indicare tutte le possibili stampe prodotte dall'applicazione distribuita. Per ogni stampa, indicare i diversi possibili output su righe consecutive.
+
+STAMPE DEL SERVER
+***PUNTO DI SINCRONIZZAZIONE 1***
+1: 0 1 2  
+2: 0 1 -3
+***PUNTO DI SINCRONIZZAZIONE 2***
+3: -3
+4: 0 1 -3 -3 || 0 1 -3 -3 -4 || 0 1 -3 -4 -3
+***PUNTO DI SINCRONIZZAZIONE 3***
+5: 17
+***PUNTO DI SINCRONIZZAZIONE 4***
+6: 10 11 17 17 6 || 10 11 17 6 17
+7: 10 11 55 55 || 10 11 55 6 55
+
+STAMPE DEL CLIENT
+***PUNTO DI SINCRONIZZAZIONE 1***
+1: 0 1 2 
+2: 0 1 -3 || 0 1 2
+***PUNTO DI SINCRONIZZAZIONE 2***
+3: -4
+4: -0 1 -3 -4 || 0 1 -3 -3 -4 | 0 1 -3 -4 -3
+***PUNTO DI SINCRONIZZAZIONE 3***
+5: -4
+***PUNTO DI SINCRONIZZAZIONE 4***
+6: 10 11 17 17 6 || 10 11 17 6 17 || 10 11 55 55 6 || 10 11 55 6 55
+7: 10 11 17 17 6 || 10 11 55 55 6 || 10 11 55 55 6 || 10 11 55 6 55
+*/
