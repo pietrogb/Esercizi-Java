@@ -56,7 +56,6 @@ class Fornitore{
     public void run() {
         Thread lavora = new Lavora();
         Thread attendi = new Attendi();
-
         attendi.start(); lavora.start();
     }
 }
