@@ -1,0 +1,6 @@
+grant {
+    permission java.net.SocketPermission "localhost:1024-", "connect, accept, listen";
+    permission java.util.PropertyPermission "*", "read, write";
+    permission java.io.FilePermission "<>", "read";
+    permission java.util.logging.LoggingPermission "control";
+};

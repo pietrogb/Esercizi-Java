@@ -1,0 +1,24 @@
+By Agostino Sturaro
+
+This example shows a complete server-client implementation using Java RMI.
+It includes a GUI, a starter class, policy files and everything needed for quick testing.
+The architecture is a simple Model-View.
+
+How to use
+Open in NetBeans IDE.
+Press run button.
+
+The naming registry should _not_ be running when you start the program.
+You do not need to start it by hand, it will be run automatically by the code.
+
+
+Events
+Custom events are implemented with the help of standard Java classes PropertyChangeListener and PropertyChangeSupport, they the easiest to use ;)
+Standard GUI events are handled by NetBeans generated code, have a look, it's cleaner than what most people write (including what you see in the teacher's books).
+
+
+Security policy
+Policy files are used to declare what permissions the program needs to run correctly.
+They are handled by the Java SecurityManager class, and set automatically at run time.
+Currently only policy.txt is used, and it's enough to make the thing work on the same computer.
+More permissions may be needed to run this on a LAN network, try using policyAll.txt for that purpose.
