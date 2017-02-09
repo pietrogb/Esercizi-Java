@@ -274,5 +274,4 @@ public class Client2{
 -------------------------------------------------------
 2b. Nel primo caso non è presente alcuna sincronizzazione, di conseguenza i metodi hanno un'ampia probabilità di essere eseguiti concorrentemente e di interferire l'uno col l'altro nella sequenza delle stampe.
 Nel secondo caso i metodi m() ed n() sono sincronizzati, di conseguenza il primo che è invocato procede con la sua esecuzione fino ad arrivare a concluderla, senza che l'altro possa causare interferenza. È stato realizzato un meccanismo di sincronizzazione lato server.
-
 */
