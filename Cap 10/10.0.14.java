@@ -38,7 +38,7 @@ class T extends Thread{
 // thread 2: uguale a thread 1
 
 public class DueThread{
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		C1 c= new C1();
 		T t1=new T(c, "A", "B");
 		T t2=new T(c, "C", "D");
