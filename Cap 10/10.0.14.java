@@ -92,13 +92,13 @@ public class Client1{
 			ref.stampa(ini);
 			ref.set();
 		// synchronized (ob){
-			while(ob.get() <2) {
+			while(ref.get() <2) {
 				try {
-					 ob.wait();
+					 ref.wait();
 				} catch(Exception e) {}
 			}
 		// }
-		ob.stampa(fin);
+		ref.stampa(fin);
 
 		} catch(ConnectionException e){
 			System.out.println("problemi di connessione al server");
@@ -118,13 +118,13 @@ public class Client2{
 			ref.stampa(ini);
 			ref.set();
 		// synchronized (ob){
-			while(ob.get() <2) {
+			while(ref.get() <2) {
 				try {
-					 ob.wait();
+					 ref.wait();
 				} catch(Exception e) {}
 			}
 		// }
-		ob.stampa(fin);
+		ref.stampa(fin);
 
 		} catch(ConnectionException e){
 			System.out.println("problemi di connessione al server");
