@@ -20,8 +20,8 @@ class A extends I.ID {
 		public String g() {return (s+f()+"--"+A.this.g());}
 	}
 	public static void main(String[] args) {
-		I.ID id = new A();
-		I i = ((A)id).new AD();
+		I.ID id = new A(); //ok
+		I i = ((A)id).new AD(); //converte id ad A e può farlo, poi lo usa per creare un nuovo ogg.AD ed è ok, poi lo salva con l'interfaccia. Bene ancora.
 		System.out.println(i.g());
 	}
 }
