@@ -69,7 +69,19 @@ class AlberoImpl implements Albero{
 	// }
 
 	public Iteratore itera() { //restituisce un iteratore sull'albero non vuoto dato in modo tale per cui le successive chiamate del suo metodo next() restituiscano le stringhe contenute nel cammino più a sinistra dell'albero di invocazione.
-		return new Iterator();
+		return new Iteratore() {
+			private Albero curr = AlberoImpl.this;
+			public boolean hasNext() {
+				return (figlioSin.nNodi() != 0);
+			}
+			public String next() {
+				if (curr.hasNext()){
+					curr = curr.figlioSin;
+					return curr.info;
+				}
+				else return NULL;
+			}
+		}
 	}
 }
 
