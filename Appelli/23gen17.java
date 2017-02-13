@@ -220,7 +220,7 @@ class AlberoImpl implements Albero extends UniCastRemoteObject {
 
 
 class Server{
-	public static void main(String[] args){
+	public static void main(String[] args) throws Exception {
 		Albero a = new AlberoImpl("pippo");
 		a.add("pluto").add("paperino").add("minnie").add("topolino").add("gastone").add("paperone");
 		Naming.rebind("albero", a);
@@ -233,37 +233,39 @@ class Server{
 }
 
 class Client {
-	try {
-		Albero a = (Albero)Naming.lookup("albero");
-		class T2 extends Thread {
-			public void run() {
-				synchronized (a){
-					if(a.presente("quo"))
-						System.out.print("BIANCO");
-					else
-						System.out.print("NERO");
-				Thread.sleep((int)Math.random()*100);
-				System.out.print("ROSSO");
+	public static void main(String[] args) throws Exception {
+		try {
+			Albero a = (Albero)Naming.lookup("albero");
+			class T2 extends Thread {
+				public void run() {
+					synchronized (a){
+						if(a.presente("quo"))
+							System.out.print("BIANCO");
+						else
+							System.out.print("NERO");
+					}
+					Thread.sleep((int)Math.random()*100);
+					System.out.print("ROSSO");
 				}
 			}
-		}
-		class T3 extends Thread {
-			public void run() {
-				synchronized (a){
-					if(a.presente("qui"))
-						System.out.print("UNO");
-					else
-						System.out.print("DUE");
+			class T3 extends Thread {
+				public void run() {
+					synchronized (a){
+						if(a.presente("qui"))
+							System.out.print("UNO");
+						else
+							System.out.print("DUE");
+					}
+					Thread.sleep((int)Math.random()*100);
+					System.out.print("TRE");
 				}
-				Thread.sleep((int)Math.random()*100);
-				System.out.print("TRE");
 			}
+			T2 t2 = new T2(); T3 t3  =new  T3();
+			t2.start(); t3.start();
+		} catch(ConnectionException e) {
+			System.out.println("Problemi di connessione al server");
+		} catch(Exception ee){
+			ee.printStackTrace());
 		}
-		T1 t1 = new T1(); T2 t2 = new T2(); T3 t3  =new  T3();
-		t1.start(); t2.start(); t3.start();
-	} catch(ConnectionException e) {
-		System.out.println("Problemi di connessione al server");
-	} catch(Exception ee){
-		ee.printStackTrace());
 	}
 }
